@@ -1,14 +1,24 @@
 import { useState } from 'react'
 import confetti from 'canvas-confetti'
+
 import { Square } from './components/Square'
 import { TURNS } from './constants'
 import { checkWinner } from './logic/board'
+import { saveGame, resetGame } from './logic/storage'
 import { WinnerModal } from './components/WinnerModal'
 import { BoardComponent } from './components/BoardComponent'
 
 function App() {
-  const [board, setBoard] = useState(Array(9).fill(null))
-  const [turn, setTurn] = useState(TURNS.X)
+  const [board, setBoard] = useState(() => {
+    const boardFromStorage = window.localStorage.getItem('board')
+    if(boardFromStorage) return JSON.parse(boardFromStorage)
+    return Array(9).fill(null)
+  })
+  const [turn, setTurn] = useState(() => {
+    const turnFromStorage = window.localStorage.getItem('turn')
+    if(turnFromStorage) return JSON.parse(turnFromStorage)
+    return TURNS.X
+  })
   const [winner, setWinner] = useState(null)
 
   const updateBoard = (index) => {
@@ -20,6 +30,8 @@ function App() {
 
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X
     setTurn(newTurn)
+
+    saveGame(newBoard, newTurn)
 
     const newWinner = checkWinner(newBoard)
     if (newWinner) {
@@ -34,6 +46,8 @@ function App() {
     setBoard(Array(9).fill(null))
     setTurn(TURNS.X)
     setWinner(null)
+
+    resetGame()
   }
 
   return (
